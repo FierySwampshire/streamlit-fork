@@ -175,10 +175,6 @@ dft = pd.DataFrame(
         "category": pd.Series(
             list("".join(random.choice(ascii_lowercase) for i in range(n_rows)))
         ).astype("category"),
-        "period[H]": [
-            (pd.Period("2022-03-14 11:52:00", freq="H") + pd.offsets.Hour(i))
-            for i in range(n_rows)
-        ],
         # "sparse": sparse_data # Sparse pandas data (column sparse) not supported
         "interval": [
             pd.Interval(left=i, right=i + 1, closed="both") for i in range(n_rows)
@@ -246,6 +242,17 @@ interval_df = pd.DataFrame(
     }
 )
 st._arrow_dataframe(interval_df)
+st.header("Period dtypes in pd.DataFrame")
+offset_types = ["L", "S", "T", "H", "D", "W", "W-FRI", "Q", "Q-MAY"]
+
+period_df = pd.DataFrame(
+    [
+        [pd.Period(date, freq=offset_type) for date in ["1970-01-01", "2012-02-14"]]
+        for offset_type in offset_types
+    ],
+    index=offset_types,
+)
+st._arrow_dataframe(period_df)
 
 st.header("Missing data")
 df = pd.DataFrame(
