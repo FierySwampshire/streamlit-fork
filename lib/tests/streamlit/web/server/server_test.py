@@ -26,6 +26,7 @@ import tornado.httpserver
 import tornado.testing
 import tornado.web
 import tornado.websocket
+from parameterized import parameterized
 
 import streamlit.web.server.server
 from streamlit import config
@@ -40,6 +41,7 @@ from streamlit.web.server.server import (
 )
 from tests.streamlit.message_mocks import create_dataframe_msg
 from tests.streamlit.web.server.server_test_case import ServerTestCase
+from tests.testutil import patch_config_options
 
 LOGGER = get_logger(__name__)
 
@@ -290,6 +292,29 @@ class PortRotateOneTest(unittest.TestCase):
                 patched__set_option.assert_called_with(
                     "server.port", 8501, config.ConfigOption.STREAMLIT_DEFINITION
                 )
+
+
+class SslServerTest(unittest.TestCase):
+    """Tests SSL server"""
+
+    @parameterized.expand(["server.sslCertFile", "server.sslKeyFile"])
+    def test_requires_two_options(self, option_name):
+        """
+        The test checks the behavior whenever  one of the two required configuration
+        option is set.
+        """
+        with patch_config_options({option_name: "/tmp/file"}), pytest.raises(
+            SystemExit
+        ), self.assertLogs("streamlit.web.server.server") as logs:
+            start_listening(mock.MagicMock())
+        self.assertEqual(
+            logs.output,
+            [
+                "ERROR:streamlit.web.server.server:Options 'server.sslCertFile' and "
+                "'server.sslKeyFile' must be set together. Set missing options or "
+                "delete existing options."
+            ],
+        )
 
 
 class UnixSocketTest(unittest.TestCase):

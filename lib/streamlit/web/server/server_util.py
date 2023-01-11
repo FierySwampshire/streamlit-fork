@@ -87,6 +87,8 @@ def get_url(host_ip: str) -> str:
     str
         The URL.
     """
+    protocol = "https" if config.get_option("server.sslCertFile") else "http"
+
     port = _get_browser_address_bar_port()
     base_path = config.get_option("server.baseUrlPath").strip("/")
 
@@ -94,8 +96,7 @@ def get_url(host_ip: str) -> str:
         base_path = "/" + base_path
 
     host_ip = host_ip.strip("/")
-
-    return f"http://{host_ip}:{port}{base_path}"
+    return f"{protocol}://{host_ip}:{port}{base_path}"
 
 
 def _get_browser_address_bar_port() -> int:

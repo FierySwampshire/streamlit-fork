@@ -355,6 +355,8 @@ class ConfigTest(unittest.TestCase):
                 "server.runOnSave",
                 "server.maxUploadSize",
                 "server.maxMessageSize",
+                "server.sslCertFile",
+                "server.sslKeyFile",
                 "ui.hideTopBar",
                 "ui.hideSidebarNav",
             ]

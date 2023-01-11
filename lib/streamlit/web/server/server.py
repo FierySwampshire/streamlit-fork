@@ -16,6 +16,7 @@ import errno
 import logging
 import os
 import socket
+import ssl
 import sys
 from typing import Any, Awaitable, List, Optional
 
@@ -101,9 +102,24 @@ def start_listening(app: tornado.web.Application) -> None:
     port.  It will error after MAX_PORT_SEARCH_RETRIES attempts.
 
     """
+    ssl_options = None
+    cert_file = config.get_option("server.sslCertFile")
+    key_file = config.get_option("server.sslKeyFile")
+    if cert_file and key_file:
+        ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        ssl_ctx.load_cert_chain(cert_file, key_file)
+        ssl_options = ssl_ctx
+    if sum(map(bool, [cert_file, key_file])) == 1:
+        LOGGER.error(
+            "Options 'server.sslCertFile' and 'server.sslKeyFile' must "
+            "be set together. Set missing options or delete existing options."
+        )
+        sys.exit(1)
 
     http_server = HTTPServer(
-        app, max_buffer_size=config.get_option("server.maxUploadSize") * 1024 * 1024
+        app,
+        max_buffer_size=config.get_option("server.maxUploadSize") * 1024 * 1024,
+        ssl_options=ssl_options,
     )
 
     if server_address_is_unix_socket():
