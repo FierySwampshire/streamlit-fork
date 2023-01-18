@@ -18,7 +18,7 @@ import os
 import socket
 import ssl
 import sys
-from typing import Any, Awaitable, List, Optional
+from typing import Any, Awaitable, List, Optional, Union
 
 import click
 import tornado.concurrent
@@ -102,19 +102,9 @@ def start_listening(app: tornado.web.Application) -> None:
     port.  It will error after MAX_PORT_SEARCH_RETRIES attempts.
 
     """
-    ssl_options = None
     cert_file = config.get_option("server.sslCertFile")
     key_file = config.get_option("server.sslKeyFile")
-    if cert_file and key_file:
-        ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_ctx.load_cert_chain(cert_file, key_file)
-        ssl_options = ssl_ctx
-    if sum(map(bool, [cert_file, key_file])) == 1:
-        LOGGER.error(
-            "Options 'server.sslCertFile' and 'server.sslKeyFile' must "
-            "be set together. Set missing options or delete existing options."
-        )
-        sys.exit(1)
+    ssl_options = _get_ssl_options(cert_file, key_file)
 
     http_server = HTTPServer(
         app,
@@ -126,6 +116,22 @@ def start_listening(app: tornado.web.Application) -> None:
         start_listening_unix_socket(http_server)
     else:
         start_listening_tcp_socket(http_server)
+
+
+def _get_ssl_options(
+    cert_file: Optional[str], key_file: Optional[str]
+) -> Union[ssl.SSLContext, None]:
+    if bool(cert_file) != bool(key_file):
+        LOGGER.error(
+            "Options 'server.sslCertFile' and 'server.sslKeyFile' must "
+            "be set together. Set missing options or delete existing options."
+        )
+        sys.exit(1)
+    if cert_file and key_file:
+        ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        ssl_ctx.load_cert_chain(cert_file, key_file)
+        return ssl_ctx
+    return None
 
 
 def start_listening_unix_socket(http_server: HTTPServer) -> None:
