@@ -68,6 +68,7 @@ import {
   PagesChanged,
   PageProfile,
   SessionEvent,
+    UpdateModalStateEvent,
   WidgetStates,
   SessionStatus,
   Config,
@@ -149,6 +150,7 @@ interface State {
   appPages: IAppPage[]
   currentPageScriptHash: string
   latestRunTime: number
+  openModalId?: string | null
 }
 
 const ELEMENT_LIST_BUFFER_TIMEOUT_MS = 10
@@ -594,6 +596,12 @@ export class App extends PureComponent<Props, State> {
     })
   }
 
+  handleUpdateModalStateEvent = (updateModalStateEventProto: UpdateModalStateEvent): void => {
+    this.setState({openModalId: updateModalStateEventProto.openModalId})
+  }
+
+
+
   /**
    * Handler for ForwardMsg.sessionStatusChanged messages
    * @param statusChangeProto a SessionStatus protobuf
@@ -957,6 +965,24 @@ export class App extends PureComponent<Props, State> {
         this.widgetMgr.removeInactive(new Set([]))
       }
     )
+  }
+
+  /**
+   * Opens a modal identified by openModalId
+   */
+  openModal(openModalId: string): void {
+    this.setState({ openModalId })
+  }
+
+  /**
+   * Closes any currently open modal
+   */
+  closeModal() {
+    if (this.isServerConnected()) {
+      const backMsg = new BackMsg({closeModal: true})
+      backMsg.type = "closeModal"
+      this.sendBackMsg(backMsg)
+    }
   }
 
   /**

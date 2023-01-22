@@ -21,6 +21,7 @@ import streamlit
 from streamlit import runtime
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto import Block_pb2
+from streamlit.proto import ForwardMsg_pb2
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import ScriptRunContext, get_script_run_ctx
 
@@ -204,6 +205,19 @@ class ModalMixin:
         # Attach the form's button info to the newly-created block's
         # DeltaGenerator.
         block_dg._form_data = FormData(form_id)
+
+        def open_modal():
+            msg = ForwardMsg_pb2.ForwardMsg()
+            msg.update_modal_state_event.open_modal_id = form_id
+            ctx.enqueue(msg)
+
+        def close_modal():
+            msg = ForwardMsg_pb2.ForwardMsg()
+            msg.update_modal_state_event.open_modal_id = "modal_closed"
+            ctx.enqueue(msg)
+
+        block_dg.open = open_modal
+        block_dg.close = close_modal
         return block_dg
 
     @gather_metrics("modal_submit_button")

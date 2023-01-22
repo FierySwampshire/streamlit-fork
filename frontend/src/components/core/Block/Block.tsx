@@ -22,6 +22,7 @@ import { BlockNode, AppNode, ElementNode } from "src/lib/AppNode"
 import { getElementWidgetID } from "src/lib/utils"
 import withExpandable from "src/hocs/withExpandable"
 import { Form } from "src/components/widgets/Form"
+import { Modal } from "src/components/widgets/Modal"
 import Tabs from "src/components/elements/Tabs"
 
 import {
@@ -107,7 +108,7 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
     const hasSubmitButton =
       submitButtonCount !== undefined && submitButtonCount > 0
     return (
-      <Form
+      <Modal
         formId={formId}
         clearOnSubmit={clearOnSubmit}
         width={props.width}
@@ -116,7 +117,7 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
         widgetMgr={props.widgetMgr}
       >
         {child}
-      </Form>
+      </Modal>
     )
   }
 
