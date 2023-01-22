@@ -88,6 +88,7 @@ from streamlit.errors import NoSessionContext, StreamlitAPIException
 from streamlit.logger import get_logger
 from streamlit.proto import Block_pb2, ForwardMsg_pb2
 from streamlit.proto.RootContainer_pb2 import RootContainer
+from streamlit.elements.modal import ModalMixin
 from streamlit.runtime import caching, legacy_caching
 from streamlit.runtime.scriptrunner import get_script_run_ctx
 from streamlit.runtime.state import NoValue
@@ -195,6 +196,7 @@ class DeltaGenerator(
     LegacyAltairMixin,
     LegacyVegaLiteMixin,
     DataFrameSelectorMixin,
+    ModalMixin,
 ):
     """Creator of Delta protobuf messages.
 

@@ -101,6 +101,25 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
     )
   }
 
+  if (node.deltaBlock.type === "modal") {
+    const { formId, clearOnSubmit } = node.deltaBlock.modal as BlockProto.Modal
+    const submitButtonCount = props.formsData.submitButtonCount.get(formId)
+    const hasSubmitButton =
+      submitButtonCount !== undefined && submitButtonCount > 0
+    return (
+      <Form
+        formId={formId}
+        clearOnSubmit={clearOnSubmit}
+        width={props.width}
+        hasSubmitButton={hasSubmitButton}
+        scriptRunState={props.scriptRunState}
+        widgetMgr={props.widgetMgr}
+      >
+        {child}
+      </Form>
+    )
+  }
+
   if (node.deltaBlock.column) {
     return (
       <StyledColumn
