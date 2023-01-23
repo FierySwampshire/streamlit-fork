@@ -477,6 +477,7 @@ export class App extends PureComponent<Props, State> {
             deltaMsg,
             msgProto.metadata as ForwardMsgMetadata
           ),
+        updateModalStateEvent: (evtMsg: UpdateModalStateEvent) => this.handleUpdateModalStateEvent(evtMsg),
         pageConfigChanged: (pageConfig: PageConfig) =>
           this.handlePageConfigChanged(pageConfig),
         pageInfoChanged: (pageInfo: PageInfo) =>
@@ -599,8 +600,6 @@ export class App extends PureComponent<Props, State> {
   handleUpdateModalStateEvent = (updateModalStateEventProto: UpdateModalStateEvent): void => {
     this.setState({openModalId: updateModalStateEventProto.openModalId})
   }
-
-
 
   /**
    * Handler for ForwardMsg.sessionStatusChanged messages
@@ -965,13 +964,6 @@ export class App extends PureComponent<Props, State> {
         this.widgetMgr.removeInactive(new Set([]))
       }
     )
-  }
-
-  /**
-   * Opens a modal identified by openModalId
-   */
-  openModal(openModalId: string): void {
-    this.setState({ openModalId })
   }
 
   /**
@@ -1410,6 +1402,7 @@ export class App extends PureComponent<Props, State> {
       hideTopBar,
       hideSidebarNav,
       currentPageScriptHash,
+      openModalId
     } = this.state
 
     const { hideSidebarNav: hostHideSidebarNav } =
@@ -1526,6 +1519,8 @@ export class App extends PureComponent<Props, State> {
               pageLinkBaseUrl={
                 this.props.hostCommunication.currentState.pageLinkBaseUrl
               }
+              openModalId={this.state.openModalId}
+              closeModal={this.closeModal.bind(this)}
             />
             {renderedDialog}
           </StyledApp>

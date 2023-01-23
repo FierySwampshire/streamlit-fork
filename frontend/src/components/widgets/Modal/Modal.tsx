@@ -27,6 +27,8 @@ export interface Props {
   scriptRunState: ScriptRunState
   children?: ReactNode
   widgetMgr: WidgetStateManager
+  openModalId?: string | null
+  closeModal: () => void
 }
 
 export const MISSING_SUBMIT_BUTTON_WARNING =
@@ -46,7 +48,10 @@ export function Modal(props: Props): ReactElement {
     width,
     scriptRunState,
     clearOnSubmit,
+    openModalId,
+    closeModal
   } = props
+
 
   // Tell WidgetStateManager if this form is `clearOnSubmit` so that it can
   // do the right thing when the form is submitted.
@@ -72,8 +77,10 @@ export function Modal(props: Props): ReactElement {
     setShowWarning(true)
   }
 
+  const isOpen = (formId === openModalId)
+
   return (
-      <SharedModal.default data-testid="stModal" isOpen={true}>
+      <SharedModal.default data-testid="stModal" isOpen={isOpen} onClose={closeModal}>
           <SharedModal.ModalBody>{children}</SharedModal.ModalBody>
       </SharedModal.default>
   )

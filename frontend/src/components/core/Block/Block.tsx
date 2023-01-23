@@ -115,6 +115,8 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
         hasSubmitButton={hasSubmitButton}
         scriptRunState={props.scriptRunState}
         widgetMgr={props.widgetMgr}
+        openModalId={props.openModalId}
+        closeModal={props.closeModal}
       >
         {child}
       </Modal>
