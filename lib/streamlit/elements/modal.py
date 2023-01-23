@@ -209,12 +209,14 @@ class ModalMixin:
         def open_modal():
             msg = ForwardMsg_pb2.ForwardMsg()
             msg.update_modal_state_event.open_modal_id = form_id
-            ctx.enqueue(msg)
+            # use get_script_run_ctx instead of ctx, because context is dynamic and can change
+            get_script_run_ctx().enqueue(msg)
 
         def close_modal():
             msg = ForwardMsg_pb2.ForwardMsg()
             msg.update_modal_state_event.open_modal_id = "modal_closed"
-            ctx.enqueue(msg)
+            # use get_script_run_ctx instead of ctx, because context is dynamic and can change
+            get_script_run_ctx().enqueue(msg)
 
         block_dg.open = open_modal
         block_dg.close = close_modal
