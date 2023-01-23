@@ -18,6 +18,7 @@ import os
 import socket
 import ssl
 import sys
+from pathlib import Path
 from typing import Any, Awaitable, List, Optional, Union
 
 import click
@@ -128,8 +129,31 @@ def _get_ssl_options(
         )
         sys.exit(1)
     if cert_file and key_file:
+        # ssl_ctx.load_cert_chain raise exception as below, but it is not
+        # sufficiently user-friendly
+        # FileNotFoundError: [Errno 2] No such file or directory
+        if not Path(cert_file).exists():
+            LOGGER.error("Cert file '%s' does not exist.", cert_file)
+            sys.exit(1)
+        if not Path(key_file).exists():
+            LOGGER.error("Key file '%s' does not exist.", key_file)
+            sys.exit(1)
+
         ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_ctx.load_cert_chain(cert_file, key_file)
+        # When the SSL certificate fails to load, an exception is raised as below,
+        # but it is not sufficiently user-friendly.
+        # ssl.SSLError: [SSL] PEM lib (_ssl.c:4067)
+        try:
+            ssl_ctx.load_cert_chain(cert_file, key_file)
+        except ssl.SSLError:
+            LOGGER.error(
+                "Failed to load SSL certificate. Make sure "
+                "cert file '%s' and key file '%s' are correct.",
+                cert_file,
+                key_file,
+            )
+            sys.exit(1)
+
         return ssl_ctx
     return None
 

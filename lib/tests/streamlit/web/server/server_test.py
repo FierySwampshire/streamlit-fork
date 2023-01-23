@@ -15,9 +15,13 @@
 """Server.py unit tests"""
 
 import asyncio
+import contextlib
 import errno
 import os
+import subprocess
+import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 from unittest.mock import patch
 
@@ -314,6 +318,95 @@ class SslServerTest(unittest.TestCase):
                 "'server.sslKeyFile' must be set together. Set missing options or "
                 "delete existing options."
             ],
+        )
+
+    @parameterized.expand(["server.sslCertFile", "server.sslKeyFile"])
+    def test_missing_file(self, option_name):
+        """
+        The test checks the behavior whenever  one of the two required configuration
+        option is set.
+        """
+        with contextlib.ExitStack() as exit_stack:
+            tmp_dir = exit_stack.enter_context(tempfile.TemporaryDirectory())
+
+            cert_file = Path(tmp_dir) / "cert.cert"
+            key_file = Path(tmp_dir) / "key.key"
+
+            new_options = {
+                "server.sslCertFile": cert_file,
+                "server.sslKeyFile": key_file,
+            }
+            exit_stack.enter_context(patch_config_options(new_options))
+
+            # Create only one file
+            Path(new_options[option_name]).write_text("TEST-CONTENT")
+
+            exit_stack.enter_context(pytest.raises(SystemExit))
+            logs = exit_stack.enter_context(
+                self.assertLogs("streamlit.web.server.server")
+            )
+
+            start_listening(mock.MagicMock())
+
+        self.assertRegex(
+            logs.output[0],
+            r"ERROR:streamlit\.web\.server\.server:(Cert|Key) file "
+            r"'.+' does not exist\.",
+        )
+
+    @parameterized.expand(["server.sslCertFile", "server.sslKeyFile"])
+    def test_invalid_file_content(self, option_name):
+        """
+        The test checks the behavior whenever  one of the two required configuration
+        option is set.
+        """
+        with contextlib.ExitStack() as exit_stack:
+            tmp_dir = exit_stack.enter_context(tempfile.TemporaryDirectory())
+            cert_file = Path(tmp_dir) / "cert.cert"
+            key_file = Path(tmp_dir) / "key.key"
+
+            subprocess.check_call(
+                [
+                    "openssl",
+                    "req",
+                    "-x509",
+                    "-newkey",
+                    "rsa:4096",
+                    "-keyout",
+                    str(key_file),
+                    "-out",
+                    str(cert_file),
+                    "-sha256",
+                    "-days",
+                    "365",
+                    "-nodes",
+                    "-subj",
+                    "/CN=localhost",
+                    # sublectAltName is required by modern browsers
+                    # See: https://github.com/urllib3/urllib3/issues/497
+                    "-addext",
+                    "subjectAltName = DNS:localhost",
+                ]
+            )
+            new_options = {
+                "server.sslCertFile": cert_file,
+                "server.sslKeyFile": key_file,
+            }
+            exit_stack.enter_context(patch_config_options(new_options))
+
+            # Overwrite file with invalid content
+            Path(new_options[option_name]).write_text("INVALID-CONTENT")
+
+            exit_stack.enter_context(pytest.raises(SystemExit))
+            logs = exit_stack.enter_context(
+                self.assertLogs("streamlit.web.server.server")
+            )
+
+            start_listening(mock.MagicMock())
+        self.assertRegex(
+            logs.output[0],
+            r"ERROR:streamlit\.web\.server\.server:Failed to load SSL certificate\. "
+            r"Make sure cert file '.+' and key file '.+' are correct\.",
         )
 
 
