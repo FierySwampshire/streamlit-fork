@@ -304,7 +304,7 @@ class SslServerTest(unittest.TestCase):
     @parameterized.expand(["server.sslCertFile", "server.sslKeyFile"])
     def test_requires_two_options(self, option_name):
         """
-        The test checks the behavior whenever  one of the two required configuration
+        The test checks the behavior whenever one of the two required configuration
         option is set.
         """
         with patch_config_options({option_name: "/tmp/file"}), pytest.raises(
@@ -323,8 +323,7 @@ class SslServerTest(unittest.TestCase):
     @parameterized.expand(["server.sslCertFile", "server.sslKeyFile"])
     def test_missing_file(self, option_name):
         """
-        The test checks the behavior whenever  one of the two required configuration
-        option is set.
+        The test checks the behavior whenever one of the two requires file is missing.
         """
         with contextlib.ExitStack() as exit_stack:
             tmp_dir = exit_stack.enter_context(tempfile.TemporaryDirectory())
@@ -357,8 +356,7 @@ class SslServerTest(unittest.TestCase):
     @parameterized.expand(["server.sslCertFile", "server.sslKeyFile"])
     def test_invalid_file_content(self, option_name):
         """
-        The test checks the behavior whenever  one of the two required configuration
-        option is set.
+        The test checks the behavior whenever one of the two requires file is corrupted.
         """
         with contextlib.ExitStack() as exit_stack:
             tmp_dir = exit_stack.enter_context(tempfile.TemporaryDirectory())
