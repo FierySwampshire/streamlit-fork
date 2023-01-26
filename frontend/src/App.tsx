@@ -46,7 +46,12 @@ import {
   setCookie,
   getIFrameEnclosingApp,
   hashString,
-  isEmbeddedInIFrame,
+  isEmbed,
+  isNoPadding,
+  isNoToolBar,
+  isNoColoredBar,
+  isNoScroll,
+  isNoFooter,
   isInChildFrame,
   notUndefined,
   getElementWidgetID,
@@ -296,7 +301,7 @@ export class App extends PureComponent<Props, State> {
         this.props.hostCommunication.setAllowedOriginsResp,
     })
 
-    if (isEmbeddedInIFrame()) {
+    if (isEmbed() || isNoScroll()) {
       document.body.classList.add("embedded")
     }
 
@@ -1393,7 +1398,7 @@ export class App extends PureComponent<Props, State> {
       "stApp",
       getEmbeddingIdClassName(this.embeddingId),
       {
-        "streamlit-embedded": isEmbeddedInIFrame(),
+        "streamlit-embedded": isEmbed(),
         "streamlit-wide": userSettings.wideMode,
       }
     )
@@ -1415,7 +1420,6 @@ export class App extends PureComponent<Props, State> {
           initialSidebarState,
           layout,
           wideMode: userSettings.wideMode,
-          embedded: isEmbeddedInIFrame(),
           isFullScreen,
           setFullScreen: this.handleFullScreen,
           addScriptFinishedHandler: this.addScriptFinishedHandler,
@@ -1427,6 +1431,12 @@ export class App extends PureComponent<Props, State> {
           sidebarChevronDownshift:
             this.props.hostCommunication.currentState.sidebarChevronDownshift,
           getBaseUriParts: this.getBaseUriParts,
+          embedded: isEmbed(),
+          noPadding: isNoPadding(),
+          noScroll: isNoScroll(),
+          noFooter: isNoFooter(),
+          noToolbar: isNoToolBar(),
+          noColoredBar: isNoColoredBar(),
         }}
       >
         <HotKeys

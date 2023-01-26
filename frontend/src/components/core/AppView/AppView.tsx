@@ -99,13 +99,22 @@ function AppView(props: AppViewProps): ReactElement {
     return () => window.removeEventListener("hashchange", listener, false)
   }, [])
 
-  const { wideMode, initialSidebarState, embedded } =
-    React.useContext(AppContext)
+  const {
+    wideMode,
+    initialSidebarState,
+    embedded,
+    noPadding,
+    noScroll,
+    noFooter,
+    noToolbar,
+  } = React.useContext(AppContext)
   const renderBlock = (node: BlockNode): ReactElement => (
     <StyledAppViewBlockContainer
       className="block-container"
       isWideMode={wideMode}
       isEmbedded={embedded}
+      noPadding={noPadding}
+      noToolbar={noToolbar}
     >
       <VerticalBlock
         node={node}
@@ -145,15 +154,24 @@ function AppView(props: AppViewProps): ReactElement {
           {renderBlock(elements.sidebar)}
         </ThemedSidebar>
       )}
-      <StyledAppViewMain tabIndex={0} isEmbedded={embedded} className="main">
+      <StyledAppViewMain
+        tabIndex={0}
+        isEmbedded={embedded}
+        noScroll={noScroll}
+        className="main"
+      >
         {renderBlock(elements.main)}
         {/* Anchor indicates to the iframe resizer that this is the lowest
         possible point to determine height */}
-        <StyledIFrameResizerAnchor isEmbedded={embedded} data-iframe-height />
+        <StyledIFrameResizerAnchor
+          isEmbedded={embedded}
+          noFooter={noFooter}
+          data-iframe-height
+        />
         {/* Spacer fills up dead space to ensure the footer remains at the
         bottom of the page in larger views */}
-        {!embedded && <StyledAppViewBlockSpacer />}
-        {!embedded && (
+        {!(embedded || noFooter) && <StyledAppViewBlockSpacer />}
+        {!(embedded || noFooter) && (
           <StyledAppViewFooter isWideMode={wideMode}>
             Made with{" "}
             <StyledAppViewFooterLink href="//streamlit.io" target="_blank">

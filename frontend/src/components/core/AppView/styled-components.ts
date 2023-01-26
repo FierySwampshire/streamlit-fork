@@ -39,14 +39,15 @@ export const StyledAppViewContainer = styled.div(({ theme }) => ({
 
 export interface StyledAppViewMainProps {
   isEmbedded: boolean
+  noScroll: boolean
 }
 
 export const StyledAppViewMain = styled.section<StyledAppViewMainProps>(
-  ({ isEmbedded, theme }) => ({
+  ({ isEmbedded, noScroll, theme }) => ({
     display: "flex",
     flexDirection: "column",
     width: theme.sizes.full,
-    overflow: isEmbedded ? "hidden" : "auto",
+    overflow: isEmbedded || noScroll ? "hidden" : "auto",
     alignItems: "center",
     "&:focus": {
       outline: "none",
@@ -73,13 +74,18 @@ export const StyledAppViewMain = styled.section<StyledAppViewMainProps>(
 export interface StyledAppViewBlockContainerProps {
   isWideMode: boolean
   isEmbedded: boolean
+  noPadding: boolean
+  noToolbar: boolean
 }
 
 export const StyledAppViewBlockContainer =
   styled.div<StyledAppViewBlockContainerProps>(
-    ({ isWideMode, isEmbedded, theme }) => {
-      const topEmbedPadding = isEmbedded ? "1rem" : "6rem"
-      const bottomEmbedPadding = isEmbedded ? "1rem" : "10rem"
+    ({ isWideMode, isEmbedded, noPadding, noToolbar, theme }) => {
+      let topEmbedPadding: string = isEmbedded || noPadding ? "1rem" : "6rem"
+      if (noToolbar === false && noPadding === true) {
+        topEmbedPadding = "3rem"
+      }
+      const bottomEmbedPadding = isEmbedded || noPadding ? "1rem" : "10rem"
       const wideSidePadding = isWideMode ? "5rem" : theme.spacing.lg
       return {
         width: theme.sizes.full,
@@ -148,12 +154,15 @@ export const StyledAppViewFooter = styled.footer<StyledAppViewFooterProps>(
 
 export interface StyledIFrameResizerAnchorProps {
   isEmbedded: boolean
+  noFooter: boolean
 }
 
 // The anchor appears above the footer, so we need to offset it by the footer
 // if the app is not embedded.
 export const StyledIFrameResizerAnchor =
-  styled.div<StyledIFrameResizerAnchorProps>(({ theme, isEmbedded }) => ({
-    position: "relative",
-    bottom: isEmbedded ? "0" : `-${theme.sizes.footerHeight}`,
-  }))
+  styled.div<StyledIFrameResizerAnchorProps>(
+    ({ theme, isEmbedded, noFooter }) => ({
+      position: "relative",
+      bottom: isEmbedded || noFooter ? "0" : `-${theme.sizes.footerHeight}`,
+    })
+  )

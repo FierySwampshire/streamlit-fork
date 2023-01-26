@@ -20,7 +20,6 @@ import {
   Element,
 } from "src/autogen/proto"
 import _ from "lodash"
-import url from "url"
 import xxhash from "xxhashjs"
 
 /**
@@ -46,11 +45,83 @@ export function debounce(delay: number, fn: any): any {
 }
 
 /**
- * Returns true if the URL parameters indicated that we're embedded in an
- * iframe.
+ * Embed query param values, which can be set in ?embed={value}, all should be lowercase
  */
-export function isEmbeddedInIFrame(): boolean {
-  return url.parse(window.location.href, true).query.embed === "true"
+export const EMBED_QUERY_PARAM_KEY = "embed".toLowerCase()
+export const EMBED_NO_COLORED_BAR = "noColoredBar".toLowerCase()
+export const EMBED_NO_TOOL_BAR = "noToolBar".toLowerCase()
+export const EMBED_NO_PADDING = "noPadding".toLowerCase()
+export const EMBED_NO_SCROLL = "noScroll".toLowerCase()
+export const EMBED_NO_FOOTER = "noFooter".toLowerCase()
+export const EMBED_TRUE = "true".toLowerCase()
+export const EMBED_QUERY_PARAM_VALUES = [
+  EMBED_NO_COLORED_BAR,
+  EMBED_NO_TOOL_BAR,
+  EMBED_NO_PADDING,
+  EMBED_NO_SCROLL,
+  EMBED_NO_FOOTER,
+  EMBED_TRUE,
+]
+
+/**
+ * Returns list of defined embed url params
+ */
+export function getEmbedUrlParams(): Set<string> {
+  const embedUrlParams = new Set<string>()
+  const urlParams = new URLSearchParams(window.location.search)
+  urlParams.forEach((paramValue, paramKey) => {
+    paramKey = paramKey.toString().toLowerCase()
+    paramValue = paramValue.toString().toLowerCase()
+    if (
+      paramKey === EMBED_QUERY_PARAM_KEY &&
+      EMBED_QUERY_PARAM_VALUES.includes(paramValue)
+    ) {
+      embedUrlParams.add(paramValue)
+    }
+  })
+  return embedUrlParams
+}
+
+/**
+ * Returns true if the URL parameters contain ?embed=true (case insensitive).
+ */
+export function isEmbed(): boolean {
+  return getEmbedUrlParams().has(EMBED_TRUE)
+}
+
+/**
+ * Returns true if the URL parameters contain ?embed=noColoredBar (case insensitive).
+ */
+export function isNoColoredBar(): boolean {
+  return getEmbedUrlParams().has(EMBED_NO_COLORED_BAR)
+}
+
+/**
+ * Returns true if the URL parameters contain ?embed=noToolBar (case insensitive).
+ */
+export function isNoToolBar(): boolean {
+  return getEmbedUrlParams().has(EMBED_NO_TOOL_BAR)
+}
+
+/**
+ * Returns true if the URL parameters contain ?embed=noScroll (case insensitive).
+ */
+export function isNoScroll(): boolean {
+  return getEmbedUrlParams().has(EMBED_NO_SCROLL)
+}
+
+/**
+ * Returns true if the URL parameters contain ?embed=noFooter (case insensitive).
+ */
+export function isNoFooter(): boolean {
+  return getEmbedUrlParams().has(EMBED_NO_FOOTER)
+}
+
+/**
+ * Returns true if the URL parameters contain ?embed=noPadding (case insensitive).
+ */
+export function isNoPadding(): boolean {
+  return getEmbedUrlParams().has(EMBED_NO_PADDING)
 }
 
 /**

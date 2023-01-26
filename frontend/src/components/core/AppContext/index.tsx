@@ -25,6 +25,11 @@ export interface Props {
   layout: PageConfig.Layout
   initialSidebarState: PageConfig.SidebarState
   embedded: boolean
+  noPadding: boolean
+  noScroll: boolean
+  noFooter: boolean
+  noToolbar: boolean
+  noColoredBar: boolean
   isFullScreen: boolean
   setFullScreen: (value: boolean) => void
   addScriptFinishedHandler: (func: () => void) => void
@@ -42,6 +47,11 @@ export default React.createContext<Props>({
   layout: PageConfig.Layout.CENTERED,
   initialSidebarState: PageConfig.SidebarState.AUTO,
   embedded: false,
+  noPadding: false,
+  noScroll: false,
+  noFooter: false,
+  noToolbar: false,
+  noColoredBar: false,
   isFullScreen: false,
   setFullScreen: (value: boolean) => {},
   addScriptFinishedHandler: (func: () => void) => {},
