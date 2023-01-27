@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import urllib.parse as parse
 from typing import Any, Dict, List
 
+from streamlit.errors import StreamlitAPIException
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner import get_script_run_ctx
+from streamlit.util import extract_embed_query_params
 
 
 @gather_metrics("experimental_get_query_params")
@@ -57,6 +60,9 @@ def get_query_params() -> Dict[str, List[str]]:
 def set_query_params(**query_params: Any) -> None:
     """Set the query parameters that are shown in the browser's URL bar.
 
+    .. warning::
+        Query param `embed` cannot be set using this method.
+
     Parameters
     ----------
     **query_params : dict
@@ -80,7 +86,24 @@ def set_query_params(**query_params: Any) -> None:
     ctx = get_script_run_ctx()
     if ctx is None:
         return
-    ctx.query_string = parse.urlencode(query_params, doseq=True)
+
+    current_embed_params = extract_embed_query_params(get_query_params())
+
+    # Drop keys containing "embed" query params
+    embed_param_key = "embed"
+    for param_name in copy.deepcopy(query_params).keys():
+        if param_name.lower() == embed_param_key:
+            query_params.pop(param_name)
+            raise StreamlitAPIException(
+                "Embed query param cannot be set using set_query_params method."
+            )
+
+    query_string = parse.urlencode(query_params, doseq=True)
+    if len(query_string) > 0:
+        query_string += current_embed_params
+    else:
+        query_string = current_embed_params[1:]
+    ctx.query_string = query_string
     msg = ForwardMsg()
     msg.page_info_changed.query_string = ctx.query_string
     ctx.enqueue(msg)

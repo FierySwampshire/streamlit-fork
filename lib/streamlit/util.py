@@ -154,3 +154,20 @@ def calc_md5(s: str) -> str:
     h = hashlib.new("md5")
     h.update(s.encode("utf-8"))
     return h.hexdigest()
+
+
+def extract_embed_query_params(query_params: Dict[str, List[str]]) -> str:
+    """Extracts embed (case-insensitive) query params from Dict,
+    and returns them as query params string."""
+    embed_param_key: str = "embed"
+    embed_values: List[str] = []
+    for param_name in query_params.keys():
+        if param_name.lower() == embed_param_key:
+            values = query_params.get(param_name, [])
+            if values and len(values) > 0:
+                embed_values = embed_values + values
+    extracted_params = set([value.lower() for value in embed_values])
+    result = ""
+    for param in extracted_params:
+        result += f"&embed={param}"
+    return result
